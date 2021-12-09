@@ -13,12 +13,13 @@
   [lines]
   (->> lines
        (map #(str/split %1 #""))
-       (map (fn [ln] (map #(Integer/parseInt %1) ln)))))
+       (mapv (fn [ln] (mapv #(Integer/parseInt %1) ln)))))
 
 (defn get-coord
   {:test #(t/is (= 3 (get-coord {:x 0 :y 1} '((2 1 9) (3 9 8)))))}
   [c grid]
-  (let [{x :x y :y} c] (nth (nth grid y nil) x nil)))
+  (let [{x :x y :y} c] 
+    (nth (nth grid y nil) x nil)))
 
 (defn get-adjacents
   {:test #(t/is (= '(3 1 9) (get-adjacents {:x 0 :y 0} '((2 1 9 9) (3 9 8 7)))))}
@@ -49,15 +50,11 @@
      (ranges xmax ymax))))
 
 (defn mark
-  {:test #(t/is (= '(({:v 1 :marked? true})) (mark {:x 0 :y 0} '(({:v 1 :marked? false})))))}
+  {:test #(t/is (= [[{:v 1 :marked? true}]] (mark {:x 0 :y 0} [[{:v 1 :marked? false}]])))}
   [point grid]
-  (map-indexed
-   (fn [row-idx row] (map-indexed (fn [col-idx item]
-                                    (if (and (= (point :x) col-idx)
-                                             (= (point :y) row-idx))
-                                      (assoc item :marked? true)
-                                      item)) row))
-   grid))
+  (let [{x :x y :y} point]
+    (update grid y 
+            (fn [row] (update row x (fn [item] (assoc item :marked? true)))))))
 
 (defn points-around
   [p]
@@ -71,7 +68,7 @@
   {:test #(t/is
            (=
             '(({:v 2 :marked? true} {:v 1 :marked? true}) ({:v 3 :marked? true} {:v 9 :marked? false}))
-            (mark-recurse {:x 1 :y 0} '(({:v 2 :marked? false} {:v 1 :marked? false}) ({:v 3 :marked? false} {:v 9 :marked? false})))))}
+            (mark-recurse {:x 1 :y 0} [[{:v 2 :marked? false} {:v 1 :marked? false}] [{:v 3 :marked? false} {:v 9 :marked? false}]])))}
   [point grid]
   (let [marked (mark point grid)
         to-mark (->> (points-around point) 
@@ -90,7 +87,7 @@
   {:test #(t/is (= 1134 (solve example-in)))}
   [lines]
   (let [grid (smush-lines lines)
-        basin-board (map (fn [row] (map (fn [item] {:v item :marked? false}) row)) grid)]
+        basin-board (mapv (fn [row] (mapv (fn [item] {:v item :marked? false}) row)) grid)]
     (->> (find-low-points grid)
          (map #(mark-recurse %1 basin-board))
          (map basin-size)

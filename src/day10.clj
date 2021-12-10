@@ -24,25 +24,12 @@
 (defn opener? [c] (some #{c} openers))
 (defn closer? [c] (some #{c} closers))
 
-(defn line-ok?
-  {:test #(t/testing
-           (t/is (= false (line-ok? "{([(<{}[<>[]}>{[]{[(<()>")))
-            (t/is (= true (line-ok? "[(()[<>])]({[<{<<[]>>("))))}
-  [line]
-  (loop [[c & rst] line stk '()]
-    (cond
-      (nil? c) true
-      (opener? c) (recur rst (conj stk c))
-      (closer? c) (if (= c (closers-map (peek stk)))
-                    (recur rst (pop stk))
-                    false))))
-
 (defn close-incomplete
   {:test #(t/is (= (seq "}}]])})]") (close-incomplete "[({(<(())[]>[[{[]{<()<>>")))}
   [line]
   (loop [[c & rst] line stk '()]
     (cond
-      (nil? c) (map closers-map rst)
+      (nil? c) (map closers-map stk)
       (opener? c) (recur rst (conj stk c))
       (closer? c) (if (= c (closers-map (peek stk)))
                     (recur rst (pop stk))

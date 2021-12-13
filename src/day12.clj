@@ -34,11 +34,12 @@ b-end"))
   (filter #(and (sequential? %) (not-any? sequential? %))
           (rest (tree-seq #(and (sequential? %) (some sequential? %)) seq x))))
 
-(defn contains-dupe?
+(defn contains-dupe-small-cave?
   [col]
   (loop [[hd & rst] col found #{}]
     (cond
       (nil? hd) false
+      (not (small-cave? hd)) (recur rst found)
       (contains? found hd) true
       :else (recur rst (conj found hd)))))
 
@@ -53,7 +54,7 @@ b-end"))
                     (remove #(and 
                               (small-cave? %1) 
                               (some (fn [pp] (= %1 pp)) p)
-                              (contains-dupe? (filter small-cave? p)))))] ;; Small cave that has been visited AND another has been visited twice
+                              (contains-dupe-small-cave? p))))] ;; Small cave that has been visited AND another has been visited twice
       (almost-flatten (map #(get-routes g %1 (conj p %1)) nxts)))))
 
 (defn solve

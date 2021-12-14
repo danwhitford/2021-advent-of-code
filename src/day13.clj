@@ -111,5 +111,4 @@ fold along x=5"))
         folds (get-folds lines)]
     (pprint-grid (reduce fold grid folds))))
 
-(solve example-in)
 (t/run-tests)

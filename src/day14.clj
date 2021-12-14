@@ -31,7 +31,7 @@ CN -> C"))
   (->> lines
        (drop 2)
        (map #(str/split %1 #" -> "))
-       (map (fn [ln] (vector (seq (first ln)) (first (seq (second ln))))))
+       (map (fn [[f s]] (vector (seq f) (first (seq s)))))
        (into {})))
 
 (defn submarine-incrementer
@@ -46,10 +46,10 @@ CN -> C"))
            (= {'(\N \C) 1, '(\C \N) 1}
               (add-new-pairs {'(\N \N) \C, '(\N \C) \B, '(\C \B) \H} {}  '(\N \N) 1)))}
   [rules polymer pair reps]
-  (let [to-inject (rules pair)]
+  (let [to-inject (rules pair) [fst scd] pair]
     (-> polymer
-        (update ,,, [(first pair) to-inject] (submarine-incrementer reps))
-        (update ,,, [to-inject (second pair)] (submarine-incrementer reps)))))
+        (update ,,, [fst to-inject] (submarine-incrementer reps))
+        (update ,,, [to-inject scd] (submarine-incrementer reps)))))
 
 (defn do-step
   {:test #(t/is
@@ -72,16 +72,16 @@ CN -> C"))
   [polymer]
   (->> polymer
        (reduce-kv
-        (fn [counts pair pair-count]
+        (fn [counts [fst scd] pair-count]
           (-> counts
-              (update ,,, (first pair) (submarine-incrementer pair-count))
-              (update ,,, (second pair) (submarine-incrementer pair-count))))
+              (update ,,, fst (submarine-incrementer pair-count))
+              (update ,,, scd (submarine-incrementer pair-count))))
         {})
        (map (fn [[k v]] {k (if (even? v) (/ v 2) (/ (inc v) 2))}))
        (into {})))
 
 (defn solve
-  {:test #(t/is (= 1588 (solve example-in 10)))}
+  {:test #(t/is (= 2188189693529 (solve example-in 40)))}
   [lines steps]
   (let [polymer-template (get-polymer-template lines)
         rules (get-insertion-rules lines)

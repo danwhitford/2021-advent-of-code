@@ -1,8 +1,7 @@
 (ns day15
   (:require
    [clojure.string :as str]
-   [clojure.test :as t]
-   [clojure.inspector]))
+   [clojure.test :as t]))
 
 (def example-in (str/split-lines "1163751742
 1381373672

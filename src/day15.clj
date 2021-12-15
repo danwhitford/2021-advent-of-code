@@ -58,7 +58,9 @@
 (defn points-around
   [{x :x y :y}]
   [{:x x :y (inc y)}
-   {:x (inc x) :y y}])
+   {:x (inc x) :y y}
+   {:x (dec x) :y y}
+   {:x x :y (dec y)}])
 
 (defn get-neighbours
   [g p]
@@ -101,3 +103,7 @@
     ((dijkstra (nodes (count grid)) {:x 0 :y 0} (partial get-neighbours grid)) {:x n :y n})))
 
 (t/run-tests)
+
+(defn solve-real
+  []
+  (solve (str/split-lines (slurp "res/day15"))))

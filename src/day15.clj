@@ -1,7 +1,8 @@
 (ns day15
   (:require
    [clojure.string :as str]
-   [clojure.test :as t]))
+   [clojure.test :as t]
+   [clojure.inspector]))
 
 (def example-in (str/split-lines "1163751742
 1381373672
@@ -20,6 +21,34 @@
        (map #(str/split %1 #""))
        (mapv (fn [ln] (mapv #(Integer/parseInt %1) ln)))))
 
+(defn inc-item
+  [item i]
+  (let [n (+ item i)] (if (> n 9) (inc (mod (dec n) 9)) n)))
+
+(defn grow-row
+  [row-idx row]
+  (into [] (map-indexed
+   (fn [col-idx item] (inc-item item (+ row-idx (quot col-idx (count row)))))
+   (take (* 5 (count row)) (cycle row)))))
+
+;; 0 1 2 3 4
+;; 1 2 3 4 5
+;; 2 3 4 0 1
+;; 3 4 0 1 2
+;; 4 0 1 2 3
+(defn grow-grid
+  {:test #(t/is
+          (= [[8 9 1 2 3]
+               [9 1 2 3 4]
+               [1 2 3 4 5]
+               [2 3 4 5 6]
+               [3 4 5 6 7]]
+             (grow-grid [[8]])))}
+  [grid]
+  (into [] (map-indexed
+   (fn [idx itm] (grow-row (quot idx (count grid)) itm))
+   (take (* 5 (count grid)) (cycle grid)))))
+
 (defn get-coord
   {:test #(t/is (= 3 (get-coord '((2 1 9) (3 9 8)) {:x 0 :y 1})))}
   [grid c]
@@ -28,40 +57,47 @@
 
 (defn points-around
   [{x :x y :y}]
-;;   [{:x x :y (dec y)}
   [{:x x :y (inc y)}
-;;    {:x (dec x) :y y}
    {:x (inc x) :y y}])
 
-(defn get-paths
-  [g pos visited]
-  (cond
-    (nil? pos) nil
+(defn get-neighbours
+  [g p]
+  (->> (points-around p)
+       (map #(assoc %1 :cost (get-coord g %1)))
+       (filter #(some? (:cost %1)))))
 
-    (and (= (pos :x) (dec (count g))) (= (pos :y) (dec (count g))))
-    (lazy-seq (list (get-coord g pos) nil nil))
+(defn nodes
+  [n]
+  (set (mapcat (fn [r] (map (fn [c] (hash-map :x c :y r)) (range n))) (range n))))
 
-    :else (let [nxt (->> (points-around pos)
-                         (filter (complement visited))
-                         (filter #(some? (get-coord g %1))))]
-            (lazy-seq (list
-                       (get-coord g pos)
-                       (get-paths g (first nxt) (conj visited pos))
-                       (get-paths g (second nxt) (conj visited pos)))))))
+(defn next-to-visit
+  [unvisited dists]
+  (if (empty? unvisited)
+    #{}
+    (apply min-key #(dists %1) unvisited)))
 
-
-(defn get-branch-totals
-  [graph sum]
-  ;; (prn (first graph) sum)
-  (cond
-    (nil? graph) sum
-    :else (lazy-cat [(get-branch-totals (second graph) (+ sum (first graph)))
-                     (get-branch-totals (last graph) (+ sum (first graph)))])))
+(defn dijkstra
+  [nodes start n-fn]
+  (loop [dists (assoc (zipmap nodes (repeat Integer/MAX_VALUE)) start 0)
+         unvisited nodes
+         curr start]
+    (println (count unvisited) "left to visit")
+    (if (empty? unvisited)
+      dists
+      (let [neighbours (n-fn curr)
+            new-neighbours (map
+                            (fn
+                              [neighbour]
+                              (update neighbour :cost #(min (+ %1 (dists curr)) (dists (select-keys neighbour [:x :y])))))
+                            neighbours)
+            new-dst (reduce (fn [acc curr] (assoc acc (select-keys curr [:x :y]) (curr :cost))) dists new-neighbours)
+            new-unvisited (disj unvisited curr)]
+        (recur new-dst new-unvisited (next-to-visit new-unvisited new-dst))))))
 
 (defn solve
-  {:test #(t/is (= 40 (solve example-in)))}
+  {:test #(t/is (= 315 (solve example-in)))}
   [lines]
-  (let [grid (smush-lines lines)]
-    (get-branch-totals (get-paths grid {:x 0 :y 0} #{}) 0)))
+  (let [grid (grow-grid (smush-lines lines)) n (dec (count grid))]
+    ((dijkstra (nodes (count grid)) {:x 0 :y 0} (partial get-neighbours grid)) {:x n :y n})))
 
 (t/run-tests)

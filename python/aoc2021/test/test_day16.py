@@ -112,3 +112,59 @@ def test_calculator1():
     reader = day16.Reader(s)
     packet = reader.read_packet()
     assert day16.eval_packet(packet) == 3   
+
+
+def test_calculator2():
+    h = '04005AC33890'
+    s = day16.expand(h)
+    reader = day16.Reader(s)
+    packet = reader.read_packet()
+    assert day16.eval_packet(packet) == 54   
+
+
+def test_calculator3():
+    h = '880086C3E88112'
+    s = day16.expand(h)
+    reader = day16.Reader(s)
+    packet = reader.read_packet()
+    assert day16.eval_packet(packet) == 7
+
+
+def test_calculator4():
+    h = 'CE00C43D881120'
+    s = day16.expand(h)
+    reader = day16.Reader(s)
+    packet = reader.read_packet()
+    assert day16.eval_packet(packet) == 9   
+
+
+def test_calculator5():
+    h = 'D8005AC2A8F0'
+    s = day16.expand(h)
+    reader = day16.Reader(s)
+    packet = reader.read_packet()
+    assert day16.eval_packet(packet) == 1   
+
+
+def test_calculator6():
+    h = 'F600BC2D8F'
+    s = day16.expand(h)
+    reader = day16.Reader(s)
+    packet = reader.read_packet()
+    assert day16.eval_packet(packet) == 0   
+
+
+def test_calculator7():
+    h = '9C005AC2F8F0'
+    s = day16.expand(h)
+    reader = day16.Reader(s)
+    packet = reader.read_packet()
+    assert day16.eval_packet(packet) == 0   
+
+
+def test_calculator8():
+    h = '9C0141080250320F1802104A08'
+    s = day16.expand(h)
+    reader = day16.Reader(s)
+    packet = reader.read_packet()
+    assert day16.eval_packet(packet) == 1  

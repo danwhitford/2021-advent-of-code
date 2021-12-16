@@ -32,14 +32,12 @@ type_map = {
     7: 'eq',
 }
 
-def adder(a, b):
-    return a+b
-
 
 def expand(hex_string):
     return ''.join(
         [hex_map.get(h, '') for h in hex_string]
     )
+
 
 def sum_versions(packet):
     total = 0
@@ -48,8 +46,9 @@ def sum_versions(packet):
     if packet['type'] != 'literal':
         for child in packet['children']:
             total += sum_versions(child)
-    
+
     return total
+
 
 def eval_packet(packet):
     t = packet['type']
@@ -71,7 +70,7 @@ def eval_packet(packet):
             v = eval_packet(c)
             if v < r:
                 r = v
-        return r    
+        return r
     elif t == 'max':
         r = -math.inf
         for c in packet['children']:
@@ -95,6 +94,7 @@ def eval_packet(packet):
         else:
             return 0
 
+
 class Reader():
     def __init__(self, packet_string):
         self.curr = 0
@@ -115,7 +115,7 @@ class Reader():
             }
         else:
             packets = []
-            length_type_id = self.read()            
+            length_type_id = self.read()
             if length_type_id == '0':
                 l = int(self.read_n(15), 2)
                 read_up_to = self.curr + l

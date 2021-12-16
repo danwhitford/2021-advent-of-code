@@ -106,12 +106,13 @@ def test_nested4():
     packet = reader.read_packet()
     assert day16.sum_versions(packet) == 31
 
+
 def test_calculator1():
     h = 'C200B40A82'
     s = day16.expand(h)
     reader = day16.Reader(s)
     packet = reader.read_packet()
-    assert day16.eval_packet(packet) == 3   
+    assert day16.eval_packet(packet) == 3
 
 
 def test_calculator2():
@@ -119,7 +120,7 @@ def test_calculator2():
     s = day16.expand(h)
     reader = day16.Reader(s)
     packet = reader.read_packet()
-    assert day16.eval_packet(packet) == 54   
+    assert day16.eval_packet(packet) == 54
 
 
 def test_calculator3():
@@ -135,7 +136,7 @@ def test_calculator4():
     s = day16.expand(h)
     reader = day16.Reader(s)
     packet = reader.read_packet()
-    assert day16.eval_packet(packet) == 9   
+    assert day16.eval_packet(packet) == 9
 
 
 def test_calculator5():
@@ -143,7 +144,7 @@ def test_calculator5():
     s = day16.expand(h)
     reader = day16.Reader(s)
     packet = reader.read_packet()
-    assert day16.eval_packet(packet) == 1   
+    assert day16.eval_packet(packet) == 1
 
 
 def test_calculator6():
@@ -151,7 +152,7 @@ def test_calculator6():
     s = day16.expand(h)
     reader = day16.Reader(s)
     packet = reader.read_packet()
-    assert day16.eval_packet(packet) == 0   
+    assert day16.eval_packet(packet) == 0
 
 
 def test_calculator7():
@@ -159,7 +160,7 @@ def test_calculator7():
     s = day16.expand(h)
     reader = day16.Reader(s)
     packet = reader.read_packet()
-    assert day16.eval_packet(packet) == 0   
+    assert day16.eval_packet(packet) == 0
 
 
 def test_calculator8():
@@ -167,4 +168,4 @@ def test_calculator8():
     s = day16.expand(h)
     reader = day16.Reader(s)
     packet = reader.read_packet()
-    assert day16.eval_packet(packet) == 1  
+    assert day16.eval_packet(packet) == 1

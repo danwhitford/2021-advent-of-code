@@ -1,6 +1,6 @@
 import os.path
 import math
-
+from functools import reduce
 
 hex_map = {
     '0': '0000',
@@ -55,44 +55,19 @@ def eval_packet(packet):
     if t == 'literal':
         return packet['val']
     elif t == 'sum':
-        r = 0
-        for c in packet['children']:
-            r += eval_packet(c)
-        return r
+        return sum([eval_packet(p) for p in packet['children']])
     elif t == 'product':
-        r = 1
-        for c in packet['children']:
-            r *= eval_packet(c)
-        return r
+        return reduce(lambda a, b: a*b, [eval_packet(p) for p in packet['children']])
     elif t == 'min':
-        r = math.inf
-        for c in packet['children']:
-            v = eval_packet(c)
-            if v < r:
-                r = v
-        return r
+        return min([eval_packet(p) for p in packet['children']])
     elif t == 'max':
-        r = -math.inf
-        for c in packet['children']:
-            v = eval_packet(c)
-            if v > r:
-                r = v
-        return r
+        return max([eval_packet(p) for p in packet['children']])
     elif t == 'gt':
-        if eval_packet(packet['children'][0]) > eval_packet(packet['children'][1]):
-            return 1
-        else:
-            return 0
+        return 1 if eval_packet(packet['children'][0]) > eval_packet(packet['children'][1]) else 0
     elif t == 'lt':
-        if eval_packet(packet['children'][0]) < eval_packet(packet['children'][1]):
-            return 1
-        else:
-            return 0
+        return 1 if eval_packet(packet['children'][0]) < eval_packet(packet['children'][1]) else 0
     elif t == 'eq':
-        if eval_packet(packet['children'][0]) == eval_packet(packet['children'][1]):
-            return 1
-        else:
-            return 0
+        return 1 if eval_packet(packet['children'][0]) == eval_packet(packet['children'][1]) else 0
 
 
 class Reader():

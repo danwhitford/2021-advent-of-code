@@ -1,10 +1,5 @@
 import aoc2021.day16 as day16
 
-
-def test_adder1():
-    assert day16.adder(2, 5) == 7
-
-
 def test_expand1():
     assert day16.expand('D2FE28') == '110100101111111000101000'
 

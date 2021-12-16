@@ -1,4 +1,6 @@
 import os.path
+import math
+
 
 hex_map = {
     '0': '0000',
@@ -58,6 +60,41 @@ def eval_packet(packet):
         for c in packet['children']:
             r += eval_packet(c)
         return r
+    elif t == 'product':
+        r = 1
+        for c in packet['children']:
+            r *= eval_packet(c)
+        return r
+    elif t == 'min':
+        r = math.inf
+        for c in packet['children']:
+            v = eval_packet(c)
+            if v < r:
+                r = v
+        return r    
+    elif t == 'max':
+        r = -math.inf
+        for c in packet['children']:
+            v = eval_packet(c)
+            if v > r:
+                r = v
+        return r
+    elif t == 'gt':
+        if eval_packet(packet['children'][0]) > eval_packet(packet['children'][1]):
+            return 1
+        else:
+            return 0
+    elif t == 'lt':
+        if eval_packet(packet['children'][0]) < eval_packet(packet['children'][1]):
+            return 1
+        else:
+            return 0
+    elif t == 'eq':
+        if eval_packet(packet['children'][0]) == eval_packet(packet['children'][1]):
+            return 1
+        else:
+            return 0
+
 class Reader():
     def __init__(self, packet_string):
         self.curr = 0
@@ -123,4 +160,4 @@ if __name__ == '__main__':
         h = expand(s)
         reader = Reader(h)
         packet = reader.read_packet()
-        print(sum_versions(packet))
+        print(eval_packet(packet))

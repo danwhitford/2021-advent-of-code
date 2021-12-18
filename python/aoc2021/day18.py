@@ -1,17 +1,7 @@
 import math
+import os 
 
-example_in = '''
-[1,2]
-[[1,2],3]
-[9,[8,7]]
-[[1,9],[8,5]]
-[[[[1,2],[3,4]],[[5,6],[7,8]]],9]
-[[[9,[3,8]],[[0,9],6]],[[[3,7],[4,9]],3]]
-[[[[1,3],[5,3]],[[1,3],[8,7]]],[[[4,9],[6,9]],[[8,2],[7,3]]]]
-'''
-
-
-class SnailFishParser():
+class SnailFishTokenizer():
     def __init__(self, s):
         self.idx = 0
         self.l = len(s)
@@ -49,11 +39,43 @@ class SnailFishParser():
         return c
 
 
+class SnailFishParser():
+    def __init__(self, s):
+        self.idx = 0
+        self.l = len(s)
+        self.s = s
+
+
+    def getSnailFish(self):
+        while self.idx < self.l:
+            n = self.read()
+            if n == '[':
+                left = self.getSnailFish()
+                right = self.getSnailFish()
+                assert ']' == self.read()
+                return {
+                    'left': left,
+                    'right': right,
+                }
+            else:
+                assert type(n) == int
+                return n
+
+
+    def peek(self):
+        return self.s[self.idx]
+
+    def read(self):
+        c = self.s[self.idx]
+        self.idx += 1
+        return c
+
+
 def add_fish(fish1, fish2):
     return ['[', *fish1, *fish2, ']']
 
 
-def reduce_fish(fish):
+def explode(fish):
     idx = 0
     nesting = 0
     while idx < len(fish):
@@ -77,19 +99,31 @@ def reduce_fish(fish):
                     break
                 counter += 1
             fish = fish[:idx] + [0] + fish[idx+4:]
-            idx = 0
-            nesting = 0
-            continue
-        elif fish[idx] >= 10:
+            return fish, True
+        idx += 1
+    return fish, False
+
+
+def split(fish):
+    idx = 0
+    while idx < len(fish):
+        if type(fish[idx]) == int and fish[idx] >= 10:
             fish = fish[:idx] + \
                 ['[', math.floor(fish[idx] / 2),
                  math.ceil(fish[idx] / 2), ']'] + fish[idx+1:]
-            idx = 0
-            nesting = 0
-            continue
-
+            return fish, True
         idx += 1
+    return fish, False
 
+
+def reduce_fish(fish):
+    while True:
+        fish, c1 = explode(fish)
+        if c1:
+            continue
+        fish, c2 = split(fish)  
+        if not c1 and not c2:
+            break
     return fish
 
 
@@ -101,17 +135,30 @@ def add_fish_list(fishes):
     return acc
 
 
+def magnitude(fish):
+    fish_tree = SnailFishParser(fish).getSnailFish()
+    def inner(fish):
+        if type(fish) == dict:
+            return (inner(fish['left']) * 3)  + (inner(fish['right']) * 2)
+        else:
+            return fish
+    return inner(fish_tree)
+
+
+def find_largest_magnitude(fishes):
+    m = 0
+    for i in fishes:
+        for j in fishes:
+            if i == j: continue
+            res = add_fish_list([i, j])
+            res = magnitude(res)
+            if res > m:
+                m = res
+    return m
+
+
 if __name__ == '__main__':
-    example_in = '''[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
-        [[[5,[2,8]],4],[5,[[9,9],0]]]
-        [6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
-        [[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]
-        [[[7,[6,4]],[3,[1,3]]],[[[5,5],1],9]]
-        [[6,[[7,3],[3,2]]],[[[3,8],[5,7]],4]]
-        [[[[5,4],[7,7]],8],[[8,3],8]]
-        [[9,3],[[9,9],[6,[4,9]]]]
-        [[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]
-        [[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]'''
-    fishes = [SnailFishParser(l.strip()).getSnailFish() for l in example_in.splitlines() if len(l.strip()) > 0]
-    ret = add_fish_list(fishes)
-    print(ret)
+    with open(os.path.dirname(__file__) + '/res/day18') as f:
+        s = f.read()
+        fishes = [SnailFishTokenizer(l.strip()).getSnailFish() for l in s.splitlines() if len(l.strip()) > 0]
+        print(find_largest_magnitude(fishes))

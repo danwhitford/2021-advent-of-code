@@ -128,7 +128,7 @@ class Reader():
                 break
         return int(s, 2)
 
-
+import json
 if __name__ == '__main__':
     with open(os.path.dirname(__file__) + '/res/day16') as f:
         s = f.read()

@@ -141,6 +141,7 @@ def test_readinput0():
     scanners = day19.parse_input(example_in)
     assert len(scanners) == 5
     assert len(scanners[0].beacons) == 25
+    assert day19.Point(30, -46, -14) in scanners[4].beacons
 
 def test_vectormap1():
     scanners = day19.parse_input(example_in)

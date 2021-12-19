@@ -1,5 +1,6 @@
 import itertools
 import math
+import os
 class Vector():
     def __init__(self,start,end,vec):
         self.start = start
@@ -63,34 +64,26 @@ class Scanner():
 
 class StarMap():
     def __init__(self, scanners):
-
         self.scanners = scanners
         self.position_table = {}
-        self.positions = []
+        self.positions = set()
 
     def resolve_pos(self, pos):
-        id, p = pos
-        if id == 0:
-            return p
-        else:
-            return self.position_table[pos]
+        ...
 
     def get_all_beacons(self):
-        while True:
-            l = len(self.position_table)
-            for a in self.scanners:
-                for b in self.scanners:
-                    if a == b: continue
-                    overlaps = a.get_overlaps(b)
-                    if len(overlaps) >= 12:
-                        for a_pos, b_pos in overlaps:
-                            print(a_pos, b_pos)
-                            self.position_table[(b.id, b_pos)] = (a.id, a_pos)
-                            self.positions.append((a_pos, b_pos))
-            if l == len(self.position_table):
-                break
+        for a in self.scanners:
+            for b in self.scanners:
+                if a == b: continue
+                overlaps = a.get_overlaps(b)
+                if len(overlaps) >= 12:
+                    for a_pos, b_pos in overlaps:
+                        self.positions.add((a.id, a_pos))
+                        self.positions.add((b.id, b_pos))
 
-        return self.position_table
+        
+        print(self.positions)
+        return self.positions
 
 
 def parse_input(s):
@@ -117,5 +110,8 @@ def parse_input(s):
 
 
 if __name__ == '__main__':
-    p = Point(0, 7, 8)
-    print(p.orientations())
+    with open(os.path.dirname(__file__) + '/res/day19') as f:
+        s = f.read()
+        scanners = parse_input(s)
+        starmap = StarMap(scanners)
+        print(len(starmap.get_all_beacons()))

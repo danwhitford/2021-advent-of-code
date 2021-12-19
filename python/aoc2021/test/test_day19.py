@@ -159,3 +159,8 @@ def test_overlaps1():
 def test_overlaps2():
     scanners = day19.parse_input(example_in)
     assert scanners[1].get_overlaps(scanners[4]) == 12
+
+def test_starmap():
+    scanners = day19.parse_input(example_in)
+    star_map = StarMap(scanners)
+    assert 79 == len(star_map.get_all_beacons())

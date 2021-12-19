@@ -69,6 +69,15 @@ class Scanner():
         return len(overlaps)
 
 
+class StarMap():
+    def __init__(self, scanners):
+        self.scanners = scanners
+        self.canonical_positions = {'0': Point(0, 0, 0)}
+
+    def get_all_beacons(self):
+        pass
+
+
 def parse_input(s):
     n = 0
     points = []

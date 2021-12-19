@@ -8,13 +8,13 @@ class Point():
     def facings(self, a, b, c):
         return [
             Point(a, b, c),
-            Point(-a, -b, -c),
+            # Point(-a, -b, -c),
             Point(-a, b, c),
             Point(a, -b, c),
             Point(a, b, -c),
-            Point(-a, -b, c),
-            Point(-a, b, -c),
-            Point(a, -b, -c),
+            # Point(-a, -b, c),
+            # Point(-a, b, -c),
+            # Point(a, -b, -c),
         ]
 
     def vector_to(self, other):
@@ -34,6 +34,9 @@ class Point():
             *self.facings(c, b, a),
         ]
         return perspectives
+
+    def __repr__(self):
+        return f'[P {self.x} {self.y} {self.z}]'
 
 
 class Scanner():
@@ -65,17 +68,18 @@ class Scanner():
             for point, point_vector in orientation.vector_map().items():
                 for self_point, self_point_vector in self_vectors.items():
                     if len(self_point_vector.intersection(point_vector)) > 0:
-                        overlaps.add(self_point)
-        return len(overlaps)
+                        overlaps.add((self_point, point))
+        return overlaps
 
 
 class StarMap():
     def __init__(self, scanners):
         self.scanners = scanners
-        self.canonical_positions = {'0': Point(0, 0, 0)}
+        self.canonical_positions = {scanners[0].id: Point(0, 0, 0)}
 
     def get_all_beacons(self):
-        pass
+        overlaps = self.scanners[0].get_overlaps(self.scanners[1])
+        print(overlaps)
 
 
 def parse_input(s):

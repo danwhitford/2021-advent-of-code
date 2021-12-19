@@ -145,7 +145,7 @@ def test_readinput0():
 def test_scannerorientation1():
     scanners = day19.parse_input(example_in)
     scanner = scanners[0]
-    assert len(scanner.orientations()) == 48
+    assert len(scanner.orientations()) == 24
 
 def test_vectormap1():
     scanners = day19.parse_input(example_in)
@@ -154,13 +154,13 @@ def test_vectormap1():
 
 def test_overlaps1():
     scanners = day19.parse_input(example_in)
-    assert scanners[0].get_overlaps(scanners[1]) == 12
+    assert len(scanners[0].get_overlaps(scanners[1])) == 12
 
 def test_overlaps2():
     scanners = day19.parse_input(example_in)
-    assert scanners[1].get_overlaps(scanners[4]) == 12
+    assert len(scanners[1].get_overlaps(scanners[4])) == 12
 
 def test_starmap():
     scanners = day19.parse_input(example_in)
-    star_map = StarMap(scanners)
+    star_map = day19.StarMap(scanners)
     assert 79 == len(star_map.get_all_beacons())

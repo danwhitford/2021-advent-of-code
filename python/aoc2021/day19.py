@@ -79,7 +79,7 @@ class StarMap():
                 if len(overlaps) >= 12:
                     for a_pos, b_pos in overlaps:
                         self.positions.add((a.id, a_pos))
-                        self.positions.add((b.id, b_pos))
+                        # self.positions.add((b.id, b_pos))
 
         
         print(self.positions)

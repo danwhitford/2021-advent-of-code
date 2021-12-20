@@ -1,5 +1,6 @@
 
 import aoc2021.day20 as day20
+import os
 
 example_in='''..#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..##..###..######.###...####..#..#####..##..#.#####...##.#.#..#.##..#.#......#.###.######.###.####...#.##.##..#..#..#####.....#.#....###..#.##......#.....#..#..#..##..#...##.######.####.####.#.#...#.......#..#.#.#...####.##.#......#..#...##.#.##..#...##.#.##..###.#......#.#.......#.#.#.####.###.##...#.....####.#..#..#.##.#....##..#.####....##...##..#...#......#.#.......#.......##..####..#...#.#.#...##..#.#..###..#####........#..####......#..#
 
@@ -32,3 +33,16 @@ def testtwostep0():
         image = day20.enhance_image(image, enhancement_algo)
     day20.print_image(image)
     assert 35 == len(image)
+
+def test_bigexample0():
+    with open(os.path.dirname(__file__) + '/../res/day20_example') as f:
+        s = f.read()
+        algo, image = day20.read_input(s)
+        day20.print_image(image)
+        print('---')
+        for i in range(2):
+            image = day20.enhance_image(image, algo, i)
+            day20.print_image(image)
+            print('---')
+
+        assert 5326 == len(image)

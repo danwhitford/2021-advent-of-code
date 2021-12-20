@@ -20,8 +20,8 @@ def enhance_image(image, algo, step=None):
     max_x = max([x for (x, y) in image])
     min_y = min([y for (x, y) in image])
     max_y = max([y for (x, y) in image])
-    for x in range(min_x-10, max_x+20):
-        for y in range(min_y-10, max_y+20):
+    for x in range(min_x-1, max_x+2):
+        for y in range(min_y-1, max_y+2):
             neighbours = [
                 (x-1, y-1),
                 (x, y-1),
@@ -38,7 +38,7 @@ def enhance_image(image, algo, step=None):
                 if (step is None) or (min_x <= xx <= max_x and min_y <= yy <= max_y):
                     neighbour_string += '1' if (xx, yy) in image else '0'
                 else:
-                    neighbour_string += '1' if step % 2 != 0 else '0'
+                    neighbour_string += '0' if step % 2 == 0 else '1'
             neighbour_num = int(neighbour_string, 2)
             if algo[neighbour_num] == '#':
                 new_image.add((x, y))

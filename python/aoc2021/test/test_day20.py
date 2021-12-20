@@ -46,10 +46,8 @@ def test_bigexample0():
         s = f.read()
         algo, image = day20.read_input(s)
         day20.print_image(image)
-        print('---')
         for i in range(2):
             image = day20.enhance_image(image, algo, i)
             day20.print_image(image)
-            print('---')
 
         assert 5326 == len(image)

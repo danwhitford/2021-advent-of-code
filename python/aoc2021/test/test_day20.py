@@ -34,6 +34,13 @@ def testtwostep0():
     day20.print_image(image)
     assert 35 == len(image)
 
+def testmanystep0():
+    enhancement_algo, image = day20.read_input(example_in)
+    for i in range(50):
+        image = day20.enhance_image(image, enhancement_algo)
+    day20.print_image(image)
+    assert 3351 == len(image)
+
 def test_bigexample0():
     with open(os.path.dirname(__file__) + '/../res/day20_example') as f:
         s = f.read()

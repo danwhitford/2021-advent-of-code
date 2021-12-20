@@ -15,7 +15,6 @@ def read_input(s):
 
 
 def enhance_image(image, algo, step=None):
-    if step is not None: print(f'{step} {step % 2 == 0}')
     new_image = set()
     min_x = min([x for (x, y) in image])
     max_x = max([x for (x, y) in image])
@@ -62,11 +61,9 @@ if __name__ == '__main__':
     with open(os.path.dirname(__file__) + '/res/day20') as f:
         s = f.read()
         algo, image = read_input(s)
-        print_image(image)
-        print('---')
-        for i in range(2):
-            image = enhance_image(image, algo, i)
-            print_image(image)
-            print('---')
 
+        for i in range(50):
+            image = enhance_image(image, algo, i)
+        
+        print_image(image)
         print(len(image))

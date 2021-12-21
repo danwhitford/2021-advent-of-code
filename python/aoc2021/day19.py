@@ -1,11 +1,14 @@
 import itertools
 import math
 import os
+
+
 class Vector():
-    def __init__(self,start,end,vec):
+    def __init__(self, start, end, vec):
         self.start = start
         self.end = end
         self.vec = vec
+
 
 class Point():
     def __init__(self, x, y, z):
@@ -22,11 +25,34 @@ class Point():
     def vector_list(self, others):
         return [self.vector_to(p) for o in others]
 
-    def add_points(self, triple):
-        return Point(self.x + triple[0], self.y + triple[1], self.z + triple[2])
+    def add_point(self, other):
+        return Point(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def minus_point(self, other):
+        return Point(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def _get_rotations(self, x, y, z):
+        o = [
+            [x, y, z, ],
+            [-x, y, z, ],
+            [x, -y, z, ],
+            [x, y, -z, ],
+            [-x, -y, z, ],
+            [-x, y, -z, ],
+            [x, -y, -z, ],
+            [-x, -y, -z, ],
+        ]
+        rotations = []
+        for oo in o:
+            rotations += [Point(x, y, z)
+                          for x, y, z in itertools.permutations(oo, 3)]
+        return rotations
+
+    def get_rotations(self):
+        return self._get_rotations(self.x, self.y, self.z)
 
     def __repr__(self):
-        return f'[P {self.x} {self.y} {self.z}]'
+        return f'(P {self.x} {self.y} {self.z})'
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y and self.z == other.z
@@ -45,7 +71,8 @@ class Scanner():
         for a in self.beacons:
             al = set()
             for b in self.beacons:
-                if a == b: continue
+                if a == b:
+                    continue
                 al.add(a.manhatten_distance(b))
             m[a] = al
         return m
@@ -55,9 +82,10 @@ class Scanner():
         overlaps = []
         for point, point_vector in other.vector_map().items():
             for self_point, self_point_vector in self_vectors.items():
-                if point == self_point: continue
+                if point == self_point:
+                    continue
                 intersection = self_point_vector.intersection(point_vector)
-                if len(intersection) > 1:
+                if len(intersection) > 2:
                     overlaps.append((self_point, point))
         return overlaps
 
@@ -65,31 +93,66 @@ class Scanner():
 class StarMap():
     def __init__(self, scanners):
         self.scanners = scanners
-        self.position_table = {}
-        self.positions = set()
+        self.sentinal = scanners[0]
+        self.scanner_locations = set()
 
-    def resolve_pos(self, pos):
-        ...
+    def _get_all_beacons(self):
+        for other in self.scanners[1:]:
+            overlaps = self.sentinal.get_overlaps(other)
+            if len(overlaps) >= 12:
+                rotated_overlaps = []
+                for a_pos, b_pos in overlaps:
+                    # print(f'Overlapping {a_pos} {b_pos}')
+                    # One rotation ALWAYS MATCHES at same index
+                    rotated_overlaps.append(
+                        [a_pos.add_point(pnt) for pnt in b_pos.get_rotations()])
+                correct_rotation_index = None
+                station_pos = None
+                for i in range(48):
+                    a = [aa[i] for aa in rotated_overlaps]
+                    if len(set(a)) == 1:
+                        correct_rotation_index = i
+                        break
+                station_pos = rotated_overlaps[0][correct_rotation_index]
+                print(f'Station pos {station_pos}')
+                self.scanner_locations.add(station_pos)
+                for b_pos in other.beacons:
+                    converted = station_pos.minus_point(
+                        b_pos.get_rotations()[correct_rotation_index])
+                    self.sentinal.beacons.add(converted)
 
     def get_all_beacons(self):
-        for a in self.scanners:
-            for b in self.scanners:
-                if a == b: continue
-                overlaps = a.get_overlaps(b)
-                if len(overlaps) >= 12:
-                    for a_pos, b_pos in overlaps:
-                        self.positions.add((a.id, a_pos))
-                else:
-                    self.positions.update({(a.id, p) for p in a.beacons if p not in [o[1] for o in overlaps]})
+        l = len(self.sentinal.beacons)
+        while True:
+            self._get_all_beacons()
+            if l == len(self.sentinal.beacons):
+                break
+            else:
+                l = len(self.sentinal.beacons)
+        return self.sentinal.beacons
 
-        
-        print(self.positions)
-        return self.positions
+    def get_largest_manhattan_distance(self):
+        l = len(self.sentinal.beacons)
+        while True:
+            self._get_all_beacons()
+            if l == len(self.sentinal.beacons):
+                break
+            else:
+                l = len(self.sentinal.beacons)
+        max_md = 0
+        for a in self.scanner_locations:
+            for b in self.scanner_locations:
+                if a == b:
+                    continue
+                md = a.manhatten_distance(b)
+                if md > max_md:
+                    max_md = md
+        return max_md
 
 
 def parse_input(s):
     n = 0
-    points = []
+    points = set()
     scanners = []
     scanner = None
     for line in s.splitlines():
@@ -101,10 +164,10 @@ def parse_input(s):
                 points = []
                 n += 1
         elif line.startswith('---'):
-            points = []
+            points = set()
         else:
-            x,y,z = [int(c) for c in line.split(',')]
-            points.append(Point(x,y,z))
+            x, y, z = [int(c) for c in line.split(',')]
+            points.add(Point(x, y, z))
     if len(points) > 0:
         scanners.append(Scanner(n, points))
     return scanners

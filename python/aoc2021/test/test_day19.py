@@ -163,3 +163,16 @@ def test_starmap():
     scanners = day19.parse_input(example_in)
     star_map = day19.StarMap(scanners)
     assert 79 == len(star_map.get_all_beacons())
+
+def test_rotations():
+    assert 48 == len(day19.Point(1,2,3).get_rotations())
+
+def test_manhattan():
+    p1 = day19.Point(1105, -1205, 1229)
+    p2 = day19.Point(-92,-2380,-20)
+    assert 3621 == p1.manhatten_distance(p2)
+
+def test_maxdistance():
+    scanners = day19.parse_input(example_in)
+    star_map = day19.StarMap(scanners)
+    assert 3621 == star_map.get_largest_manhattan_distance()

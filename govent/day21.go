@@ -45,20 +45,7 @@ type gameState struct{
 	next_roll [3]int
 }
 
-func pop(stack *[]gameState) (gameState) {	
-	l := len(*stack) - 1
-	ret := (*stack)[l]
-	*stack = (*stack)[:l]
-	return ret
-}
-
-func move(game gameState, cache *map[gameState]gameState) gameState {
-	ret, prs := (*cache)[game]
-	if prs {
-		return ret
-	}
-
-	old_game := gameState{game.p1_pos, game.p1_score, game.p2_pos, game.p2_score, game.next_player, game.next_roll}
+func move(game gameState) gameState {
 	points := 0
 	for _, v := range game.next_roll {
 		points += v
@@ -82,47 +69,47 @@ func move(game gameState, cache *map[gameState]gameState) gameState {
 		game.next_player = 1
 	}
 
-	(*cache)[old_game] = game
 	return game
 }
 
 func main() {
-	stack := []gameState{}
-	cache := make(map[gameState]gameState)
+	// stack := []gameState{}
+	universes := make(map[gameState]int)
 	for _, roll := range rolls() {
-		stack = append(stack, gameState{4, 8, 0, 0, 1, roll})
+		universes[gameState{8, 2, 0, 0, 1, roll}] = 1
 	}
 	wins := make(map[string]int)
 	wins["p1"] = 0
 	wins["p2"] = 0
 
-	var game gameState
-	counter := 0
-	for len(stack) > 0 {
-		if counter > 10000000 {
-			fmt.Println(wins, len(stack))
-			counter = 0
-		}
-		counter++
-		game = pop(&stack)
+	for len(universes) > 0 {
+		fmt.Println(wins, len(universes))
 
-		game = move(game, &cache)
-		if game.p1_score >= 21 {
-			wins["p1"]++
-			continue
-		}
-		for _, roll := range rolls() {
-			stack = append(stack, gameState{game.p1_pos, game.p2_pos, game.p1_score, game.p2_score, game.next_player, roll})
-		}
+		for universe, count := range universes {
+			delete(universes, universe)
+			
+			next_universe := move(universe)
+			
+			if next_universe.p1_score >= 21 {
+				wins["p1"] += count
+				continue
+			}			
+			if next_universe.p2_score >= 21 {
+				wins["p2"] += count
+				continue
+			}
 
-		game = move(game, &cache)
-		if game.p2_score >= 21 {
-			wins["p2"]++
-			continue
-		}
-		for _, roll := range rolls() {
-			stack = append(stack, gameState{game.p1_pos, game.p2_pos, game.p1_score, game.p2_score, game.next_player, roll})
+			for _, roll := range rolls() {
+				game := gameState{next_universe.p1_pos, next_universe.p2_pos, next_universe.p1_score, next_universe.p2_score, next_universe.next_player, roll}
+				_, prs := universes[game]
+				if prs {
+					universes[game] += count
+				} else {
+					universes[game] = count
+				}
+			}
 		}
 	}
-	fmt.Println(wins)
+	fmt.Println(wins["p1"])
+	fmt.Println(wins["p2"])
 }

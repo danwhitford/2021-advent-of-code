@@ -19,7 +19,7 @@ class Point():
     def vector_to(self, other):
         return (other.x-self.x, other.y-self.y, other.z-self.z)
 
-    def manhatten_distance(self, other):
+    def euclidean_distance(self, other):
         return math.sqrt(((other.x - self.x) * (other.x - self.x)) + ((other.y - self.y) * (other.y - self.y)) + ((other.z - self.z) * (other.z - self.z)))
 
     def vector_list(self, others):
@@ -73,7 +73,7 @@ class Scanner():
             for b in self.beacons:
                 if a == b:
                     continue
-                al.add(a.manhatten_distance(b))
+                al.add(a.euclidean_distance(b))
             m[a] = al
         return m
 

@@ -170,7 +170,7 @@ def test_rotations():
 def test_manhattan():
     p1 = day19.Point(1105, -1205, 1229)
     p2 = day19.Point(-92,-2380,-20)
-    assert 3621 == p1.manhatten_distance(p2)
+    assert 3621 == p1.euclidean_distance(p2)
 
 def test_maxdistance():
     scanners = day19.parse_input(example_in)

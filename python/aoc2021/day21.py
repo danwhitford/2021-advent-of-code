@@ -1,6 +1,5 @@
 import itertools
-from functools import cache
-
+import collections
 
 class GameState():
     def __init__(self, p1pos, p2pos, p1score, p2score, nextroll, nextplayer):
@@ -22,7 +21,6 @@ class GameState():
                      self.p2score, self.nextroll, self.nextplayer))
 
 
-@cache
 def next_step(pos, score, points):
     pos = pos + points
     if pos > 10:
@@ -61,11 +59,9 @@ def play(p1start, p2start):
     while len(metaverse) > 0:
         if counter > 100000:
             print(wins)
-            # print(next_step.cache_info())
             counter = 0
         counter += 1
 
-        # new_metaverse = {}
         game, game_count = metaverse.popitem()
         next_game = move(game)
 
@@ -77,12 +73,12 @@ def play(p1start, p2start):
             continue
 
         for universe in rolls():
-            next_game = GameState(next_game.p1pos, next_game.p2pos,
+            ng = GameState(next_game.p1pos, next_game.p2pos,
                                   next_game.p1score, next_game.p2score, universe, next_game.nextplayer)
-            if next_game in metaverse:
-                metaverse[next_game] += game_count
+            if ng in metaverse:
+                metaverse[ng] += game_count
             else:
-                metaverse[next_game] = game_count
+                metaverse[ng] = game_count
 
     return wins
 

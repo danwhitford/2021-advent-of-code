@@ -1,5 +1,6 @@
 import itertools
 import collections
+import functools
 
 class GameState():
     def __init__(self, p1pos, p2pos, p1score, p2score, nextroll, nextplayer):
@@ -27,7 +28,7 @@ def next_step(pos, score, points):
         pos = (pos - 1) % 10 + 1
     return pos, score + pos
 
-
+@functools.lru_cache(maxsize=10000)
 def move(gamestate):
     points = sum(gamestate.nextroll)
 
@@ -59,6 +60,7 @@ def play(p1start, p2start):
     while len(metaverse) > 0:
         if counter > 100000:
             print(wins)
+            print(move.cache_info())
             counter = 0
         counter += 1
 

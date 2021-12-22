@@ -27,6 +27,7 @@ def next_step(pos, score, points):
         pos = (pos - 1) % 10 + 1
     return pos, score + pos
 
+@functools.cache
 def move(gamestate):
     points = gamestate.nextroll
 
@@ -58,6 +59,7 @@ def play(p1start, p2start):
     while len(metaverse) > 0:
         if counter > 100000:
             print(wins, len(metaverse))
+            print(move.cache_info())
             counter = 0
         counter += 1
 
@@ -65,10 +67,10 @@ def play(p1start, p2start):
         next_game = move(game)
 
         if next_game.p1score >= 21:
-            wins[0] += 1
+            wins[0] += game_count
             continue
         if next_game.p2score >= 21:
-            wins[1] += 1
+            wins[1] += game_count
             continue
 
         for universe in rolls():
@@ -83,9 +85,5 @@ def play(p1start, p2start):
 
 
 if __name__ == '__main__':
-    metaverse = collections.OrderedDict()
-    for universe in rolls():
-        metaverse[GameState(5, 5, 0, 0, sum(universe), 1)] = 1
-    print(len(metaverse))
-    # res = play(4, 8)
-    # print(res)
+    res = play(4, 8)
+    print(res)

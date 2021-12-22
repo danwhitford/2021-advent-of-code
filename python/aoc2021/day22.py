@@ -1,6 +1,7 @@
 import os
 import itertools
 
+
 class Cube():
     def __init__(self, x, y, z):
         self.x = x
@@ -17,41 +18,107 @@ class Cube():
         return hash((self.x, self.y, self.z))
 
 
+class Cuboid():
+    def __init__(self, xmin, xmax, ymin, ymax, zmin, zmax):
+        if xmin > xmax or ymin > ymax or zmin > zmax:
+            print(f'err {(xmin, xmax, ymin, ymax, zmin, zmax)}')
+            raise "Bad min maxes"
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
+        self.zmin = zmin
+        self.zmax = zmax
+
+    def __repr__(self):
+        return f'Cuboid=({self.xmin} {self.xmax} {self.ymin} {self.ymax} {self.zmin} {self.zmax})'
+
+    def intersects(self, other):
+        return other.xmin <= self.xmax and \
+            self.xmin <= other.xmax and \
+            other.ymin <= self.ymax and \
+            self.ymin <= other.ymax and \
+            other.zmin <= self.zmax and \
+            self.zmin <= other.zmax
+
+    def split(self, other):
+        splits = []
+
+        if other.xmin > self.xmin:
+            splits.append(Cuboid(self.xmin, other.xmin-1,
+                          self.ymin, self.ymax, self.zmin, self.zmax))
+        if other.xmax < self.xmax:
+            splits.append(Cuboid(other.xmax+1, self.xmax,
+                          self.ymin, self.ymax, self.zmin, self.zmax))
+
+        middle_x_min = max(self.xmin, other.xmin)
+        middle_x_max = min(self.xmax, other.xmax)
+        if other.ymin > self.ymin:
+            splits.append(Cuboid(middle_x_min, middle_x_max,
+                          self.ymin, other.ymin-1, self.zmin, self.zmax))
+        if other.ymax < self.ymax:
+            splits.append(Cuboid(middle_x_min, middle_x_max,
+                          other.ymax+1, self.ymax, self.zmin, self.zmax))
+
+        middle_y_min = max(self.ymin, other.ymin)
+        middle_y_max = min(self.ymax, other.ymax)
+        if other.zmin > self.zmin:
+            splits.append(Cuboid(middle_x_min, middle_x_max,
+                          middle_y_min, middle_y_max, self.zmin, other.zmin-1))
+        if other.zmax < self.zmax:
+            splits.append(Cuboid(middle_x_min, middle_x_max,
+                          middle_y_min, middle_y_max, other.zmax+1, self.zmax))
+
+        return splits
+
+    def volume(self):
+        return (1 + self.xmax - self.xmin) * (1 + self.ymax - self.ymin) * (1 + self.zmax - self.zmin)
+
+
 class Reactor():
     def __init__(self):
         self.on_cubes = set()
-
-    def make_cuboid(self, xmin, xmax, ymin, ymax, zmin, zmax):
-        return {Cube(x,y,z) for x,y,z in itertools.product(range(zmin, zmax+1), range(ymin, ymax+1), range(xmin, xmax+1))}
-
-    def turn_on_cuboid(self, xmin, xmax, ymin, ymax, zmin, zmax):
-        print('making')
-        cuboid = self.make_cuboid(xmin, xmax, ymin, ymax, zmin, zmax)
-        print('doing')
-        self.on_cubes.update(cuboid)
-
-    def turn_off_cuboid(self, xmin, xmax, ymin, ymax, zmin, zmax):
-        cuboid = self.make_cuboid(xmin, xmax, ymin, ymax, zmin, zmax)
-        self.on_cubes.difference_update(cuboid)
+        self.cuboids = []
 
     def central_reboot(self, instructions):
+        self.cuboids = []
         for i in instructions:
             xmin, xmax, ymin, ymax, zmin, zmax = i[1:]
-            if xmin < -50 or xmax > 50 or ymin < -50 or ymax > 50: continue
+            if xmin < -50 or xmax > 50 or ymin < -50 or ymax > 50 or zmin < -50 or zmax > 50:
+                continue
+            step = Cuboid(xmin, xmax, ymin, ymax, zmin, zmax)
+            new_cuboids = []
+            for cuboid in self.cuboids:
+                if cuboid.intersects(step):
+                    for split in cuboid.split(step):
+                        new_cuboids.append(split)
+                else:
+                    new_cuboids.append(cuboid)
             if i[0] == 'on':
-                self.turn_on_cuboid(xmin, xmax, ymin, ymax, zmin, zmax)
-            elif i[0] == 'off':
-                self.turn_off_cuboid(xmin, xmax, ymin, ymax, zmin, zmax)
+                new_cuboids.append(step)
+            self.cuboids = new_cuboids
 
     def full_reboot(self, instructions):
+        self.cuboids = []
         for i in instructions:
-            print(i)
             xmin, xmax, ymin, ymax, zmin, zmax = i[1:]
-            # if xmin < -50 or xmax > 50 or ymin < -50 or ymax > 50: continue
+            step = Cuboid(xmin, xmax, ymin, ymax, zmin, zmax)
+            new_cuboids = []
+            for cuboid in self.cuboids:
+                if cuboid.intersects(step):
+                    for split in cuboid.split(step):
+                        new_cuboids.append(split)
+                else:
+                    new_cuboids.append(cuboid)
             if i[0] == 'on':
-                self.turn_on_cuboid(xmin, xmax, ymin, ymax, zmin, zmax)
-            elif i[0] == 'off':
-                self.turn_off_cuboid(xmin, xmax, ymin, ymax, zmin, zmax)
+                new_cuboids.append(step)
+            self.cuboids = new_cuboids
+
+    def lit_cubes(self):
+        total = 0
+        for c in self.cuboids:
+            total += c.volume()
+        return total
 
 
 class InputParser():
@@ -80,4 +147,4 @@ if __name__ == '__main__':
         instructions = parser.parse()
         reactor = Reactor()
         reactor.full_reboot(instructions)
-        print(len(reactor.on_cubes))
+        print(reactor.lit_cubes())

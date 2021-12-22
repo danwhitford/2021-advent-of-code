@@ -1,5 +1,5 @@
 import os
-
+import itertools
 
 class Cube():
     def __init__(self, x, y, z):
@@ -22,15 +22,12 @@ class Reactor():
         self.on_cubes = set()
 
     def make_cuboid(self, xmin, xmax, ymin, ymax, zmin, zmax):
-        cuboid = set()
-        for x in range(xmin, xmax+1):
-            for y in range(ymin, ymax+1):
-                for z in range(zmin, zmax+1):
-                    cuboid.add(Cube(x, y, z))
-        return cuboid
+        return {Cube(x,y,z) for x,y,z in itertools.product(range(zmin, zmax+1), range(ymin, ymax+1), range(xmin, xmax+1))}
 
     def turn_on_cuboid(self, xmin, xmax, ymin, ymax, zmin, zmax):
+        print('making')
         cuboid = self.make_cuboid(xmin, xmax, ymin, ymax, zmin, zmax)
+        print('doing')
         self.on_cubes.update(cuboid)
 
     def turn_off_cuboid(self, xmin, xmax, ymin, ymax, zmin, zmax):

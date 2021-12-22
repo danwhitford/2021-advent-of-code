@@ -1,5 +1,5 @@
 import itertools
-
+import functools
 class GameState():
     def __init__(self, p1pos, p2pos, p1score, p2score, nextroll, nextplayer):
         self.p1pos = p1pos
@@ -46,7 +46,7 @@ def play(p1start, p2start):
     for universe in rolls():
         metaverse[GameState(p1start, p2start, 0, 0, universe, 1)] = 1
 
-    wins = [0,1]
+    wins = [0,0]
     counter = 0
     while len(metaverse) > 0:
         if counter > 1000000:

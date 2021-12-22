@@ -22,6 +22,9 @@ class Point():
     def euclidean_distance(self, other):
         return math.sqrt(((other.x - self.x) * (other.x - self.x)) + ((other.y - self.y) * (other.y - self.y)) + ((other.z - self.z) * (other.z - self.z)))
 
+    def manhatten_distance(self, other):
+        return abs(self.x - other.x) + abs(self.y - other.y) + abs(self.z - other.z)
+
     def vector_list(self, others):
         return [self.vector_to(p) for o in others]
 
@@ -179,3 +182,4 @@ if __name__ == '__main__':
         scanners = parse_input(s)
         starmap = StarMap(scanners)
         print(len(starmap.get_all_beacons()))
+        print(starmap.get_largest_manhattan_distance())

@@ -1,21 +1,40 @@
 import itertools
-import functools
 
-@functools.lru_cache(maxsize=None)
-def move(p1_pos, p2_pos, next_roll, p1_score, p2_score, next_player):
-    points = sum(next_roll)
-    if next_player == 1:
-        p1_pos += points
-        if p1_pos > 10:
-            p1_pos = (p1_pos - 1) % 10 + 1
-        p1_score += p1_pos
+class GameState():
+    def __init__(self, p1pos, p2pos, p1score, p2score, nextroll, nextplayer):
+        self.p1pos = p1pos
+        self.p2pos = p2pos
+        self.p1score = p1score
+        self.p2score = p2score
+        self.nextroll = nextroll
+        self.nextplayer = nextplayer
+
+    def __repr__(self):
+        return f'{self.p1pos} {self.p2pos} {self.p1score} {self.p2score} {self.nextroll} {self.nextplayer}'
+
+    def __hash__(self):
+        return hash((self.p1pos, self.p2pos, self.p1score,
+                     self.p2score, self.nextroll, self.nextplayer))
+
+
+def move(gamestate):
+    points = sum(gamestate.nextroll)
+    p1pos = gamestate.p1pos
+    p1score = gamestate.p1score
+    p2pos = gamestate.p2pos
+    p2score = gamestate.p2score
+    if gamestate.nextplayer == 1:
+        p1pos = gamestate.p1pos + points
+        if p1pos > 10:
+            p1pos = (p1pos - 1) % 10 + 1
+        p1score = gamestate.p1score + p1pos
     else:
-        p2_pos += points
-        if p2_pos > 10:
-            p2_pos = (p2_pos - 1) % 10 + 1
-        p2_score += p2_pos
-    next_player = 1 if next_player == 2 else 2
-    return (p1_pos, p2_pos, p1_score, p2_score, next_player)
+        p2pos = gamestate.p2pos + points
+        if p2pos > 10:
+            p2pos = (p2pos - 1) % 10 + 1
+        p2score = gamestate.p2score + p2pos
+    nextplayer = 1 if gamestate.nextplayer == 2 else 2
+    return GameState(p1pos, p2pos, p1score, p2score, gamestate.nextroll, nextplayer)
 
 
 def rolls():
@@ -23,40 +42,40 @@ def rolls():
 
 
 def play(p1start, p2start):
-    stack = []
-
+    metaverse = {}
     for universe in rolls():
-        stack.append((p1start, p2start, universe, 0, 0, 1))
+        metaverse[GameState(p1start, p2start, 0, 0, universe, 1)] = 1
 
-    wins = {'p1': 0, 'p2': 0}
+    wins = [0,1]
     counter = 0
-    while len(stack) > 0:
-        counter += 1
-        if counter % 10000 == 0:
+    while len(metaverse) > 0:
+        if counter > 1000000:
             print(wins)
-        
-        p1_pos, p2_pos, universe, p1_score, p2_score, next_player = stack.pop()
+            counter = 0
+        counter += 1
 
-        p1_pos, p2_pos, p1_score, p2_score, next_player = move(p1_pos, p2_pos, universe, p1_score, p2_score, next_player)
-        if p1_score >= 21:
-            wins['p1'] += 1
+        # new_metaverse = {}
+        game, game_count = metaverse.popitem()
+        next_game = move(game)
+
+        if next_game.p1score >= 21:
+            wins[0] += 1
+            continue
+        if next_game.p2score >= 21:
+            wins[1] += 1
             continue
 
-        for universe in rolls():            
-            stack.append((p1_pos, p2_pos, universe, p1_score, p2_score, next_player))
+        for universe in rolls():
+            next_game = GameState(next_game.p1pos, next_game.p2pos,
+                                  next_game.p1score, next_game.p2score, universe, next_game.nextplayer)
+            if next_game in metaverse:
+                metaverse[next_game] += game_count
+            else:
+                metaverse[next_game] = game_count
 
-        p1_pos, p2_pos, p1_score, p2_score, next_player = move(p1_pos, p2_pos, universe, p1_score, p2_score, next_player)
-        if p2_score >= 21:
-            wins['p2'] += 1
-            continue
-
-        for universe in rolls():            
-            stack.append((p1_pos, p2_pos, universe, p1_score, p2_score, next_player))
-    print(counter)
     return wins
 
 
 if __name__ == '__main__':
     res = play(4, 8)
-    # print(f'Rolls: {game.rolls} P1: {game.p1_score} P2: {game.p2_score}')
     print(res)

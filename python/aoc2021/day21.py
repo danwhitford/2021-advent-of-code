@@ -1,5 +1,5 @@
 import itertools
-import functools
+from functools import cache
 
 
 class GameState():
@@ -21,23 +21,28 @@ class GameState():
         return hash((self.p1pos, self.p2pos, self.p1score,
                      self.p2score, self.nextroll, self.nextplayer))
 
-# @functools.cache
+
+@cache
+def next_step(pos, score, points):
+    pos = pos + points
+    if pos > 10:
+        pos = (pos - 1) % 10 + 1
+    return pos, score + pos
+
+
 def move(gamestate):
     points = sum(gamestate.nextroll)
+
     p1pos = gamestate.p1pos
     p1score = gamestate.p1score
     p2pos = gamestate.p2pos
     p2score = gamestate.p2score
+
     if gamestate.nextplayer == 1:
-        p1pos = gamestate.p1pos + points
-        if p1pos > 10:
-            p1pos = (p1pos - 1) % 10 + 1
-        p1score = gamestate.p1score + p1pos
+        p1pos, p1score = next_step(p1pos, p1score, points)
     else:
-        p2pos = gamestate.p2pos + points
-        if p2pos > 10:
-            p2pos = (p2pos - 1) % 10 + 1
-        p2score = gamestate.p2score + p2pos
+        p2pos, p2score = next_step(p2pos, p2score, points)
+
     nextplayer = 1 if gamestate.nextplayer == 2 else 2
     return GameState(p1pos, p2pos, p1score, p2score, gamestate.nextroll, nextplayer)
 
@@ -54,8 +59,9 @@ def play(p1start, p2start):
     wins = [0, 0]
     counter = 0
     while len(metaverse) > 0:
-        if counter > 1000000:
+        if counter > 100000:
             print(wins)
+            # print(next_step.cache_info())
             counter = 0
         counter += 1
 

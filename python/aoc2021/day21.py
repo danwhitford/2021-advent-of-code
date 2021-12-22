@@ -52,7 +52,11 @@ def rolls():
 def play(p1start, p2start):
     metaverse = collections.OrderedDict()
     for universe in rolls():
-        metaverse[GameState(p1start, p2start, 0, 0, sum(universe), 1)] = 1
+        gs = GameState(p1start, p2start, 0, 0, sum(universe), 1)
+        if gs in metaverse:
+            metaverse[gs] += 1
+        else:
+            metaverse[gs] = 1
 
     wins = [0, 0]
     counter = 0

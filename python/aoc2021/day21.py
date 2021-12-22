@@ -1,5 +1,7 @@
 import itertools
 import functools
+
+
 class GameState():
     def __init__(self, p1pos, p2pos, p1score, p2score, nextroll, nextplayer):
         self.p1pos = p1pos
@@ -12,11 +14,14 @@ class GameState():
     def __repr__(self):
         return f'{self.p1pos} {self.p2pos} {self.p1score} {self.p2score} {self.nextroll} {self.nextplayer}'
 
+    def __eq__(self, other):
+        return self.p1pos == other.p1pos and self.p2pos == other.p2pos and self.p1score == other.p1score and self.p2score == other.p2score and self.nextroll == other.nextroll and self.nextplayer == other.nextplayer
+
     def __hash__(self):
         return hash((self.p1pos, self.p2pos, self.p1score,
                      self.p2score, self.nextroll, self.nextplayer))
 
-
+# @functools.cache
 def move(gamestate):
     points = sum(gamestate.nextroll)
     p1pos = gamestate.p1pos
@@ -46,7 +51,7 @@ def play(p1start, p2start):
     for universe in rolls():
         metaverse[GameState(p1start, p2start, 0, 0, universe, 1)] = 1
 
-    wins = [0,0]
+    wins = [0, 0]
     counter = 0
     while len(metaverse) > 0:
         if counter > 1000000:

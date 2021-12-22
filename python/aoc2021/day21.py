@@ -12,7 +12,7 @@ class GameState():
         self.nextplayer = nextplayer
 
     def __repr__(self):
-        return f'{self.p1pos} {self.p2pos} {self.p1score} {self.p2score} {self.nextroll} {self.nextplayer}'
+        return f'GameState=({self.p1pos} {self.p2pos} {self.p1score} {self.p2score} {self.nextroll} {self.nextplayer})'
 
     def __eq__(self, other):
         return self.p1pos == other.p1pos and self.p2pos == other.p2pos and self.p1score == other.p1score and self.p2score == other.p2score and self.nextroll == other.nextroll and self.nextplayer == other.nextplayer
@@ -21,16 +21,14 @@ class GameState():
         return hash((self.p1pos, self.p2pos, self.p1score,
                      self.p2score, self.nextroll, self.nextplayer))
 
-
 def next_step(pos, score, points):
     pos = pos + points
     if pos > 10:
         pos = (pos - 1) % 10 + 1
     return pos, score + pos
 
-@functools.lru_cache(maxsize=10000)
 def move(gamestate):
-    points = sum(gamestate.nextroll)
+    points = gamestate.nextroll
 
     p1pos = gamestate.p1pos
     p1score = gamestate.p1score
@@ -51,16 +49,15 @@ def rolls():
 
 
 def play(p1start, p2start):
-    metaverse = {}
+    metaverse = collections.OrderedDict()
     for universe in rolls():
-        metaverse[GameState(p1start, p2start, 0, 0, universe, 1)] = 1
+        metaverse[GameState(p1start, p2start, 0, 0, sum(universe), 1)] = 1
 
     wins = [0, 0]
     counter = 0
     while len(metaverse) > 0:
         if counter > 100000:
-            print(wins)
-            print(move.cache_info())
+            print(wins, len(metaverse))
             counter = 0
         counter += 1
 
@@ -76,7 +73,7 @@ def play(p1start, p2start):
 
         for universe in rolls():
             ng = GameState(next_game.p1pos, next_game.p2pos,
-                                  next_game.p1score, next_game.p2score, universe, next_game.nextplayer)
+                                  next_game.p1score, next_game.p2score, sum(universe), next_game.nextplayer)
             if ng in metaverse:
                 metaverse[ng] += game_count
             else:
@@ -86,5 +83,9 @@ def play(p1start, p2start):
 
 
 if __name__ == '__main__':
-    res = play(4, 8)
-    print(res)
+    metaverse = collections.OrderedDict()
+    for universe in rolls():
+        metaverse[GameState(5, 5, 0, 0, sum(universe), 1)] = 1
+    print(len(metaverse))
+    # res = play(4, 8)
+    # print(res)

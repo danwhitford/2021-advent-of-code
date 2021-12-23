@@ -141,46 +141,48 @@ class Burrow():
       return any(r is None for r in room)
 
 
+def h(burrow):
+  ins = 1
+  outs = 1
+  for h in burrow.hall:
+    if h is None:
+      outs += 1
+    else:
+      ins += 1
+  perc_in = ins / (len(burrow.hall) + 1)
+  return 2 * perc_in
+
+
 def score_to_complete(burrow):
-    scores = {
+    g_scores = {
       burrow: 0
     }
     visited = set()
     unvisited = []
+    previous = {}
     heapq.heappush(unvisited, (0, 0, burrow))
 
     count = 0
     while len(unvisited) > 0:
-      if count % 10000 == 0:
-        print(f'unvis {len(unvisited):,}')
       oldscore, _, b = heapq.heappop(unvisited)
-      visited.add(b)
+
       if b.is_complete():
-        break
+        return g_scores[b]
 
-      for neighbour, score in b.get_nextsteps():
-        if neighbour in visited: continue
+      for neighbour, dist in b.get_nextsteps():
+        tento_score = g_scores[b] + dist
+        neighbour_gscore = g_scores.get(neighbour, float('inf'))
+        if tento_score < neighbour_gscore:
+          previous[neighbour] = b
+          g_scores[neighbour] = tento_score
+          count += 1
+          heapq.heappush(unvisited, (tento_score + h(neighbour), count, neighbour))
 
-        if neighbour in scores:
-          if oldscore + score < scores[neighbour]:
-            scores[neighbour] = oldscore + score
-        else:
-          scores[neighbour] = oldscore + score
-
-        count += 1
-        heapq.heappush(unvisited, (scores[neighbour], count, neighbour))
-
-
-    for k, v in scores.items():
-      if k.is_complete():
-        print(k)
-        print('Answer', v)
-        return v
-
+    raise "poop"
 
 if __name__ == '__main__':
     # burrow = Burrow((None, None, None, None, None, None, None, None, None, None, None), (('C', 'A'), ('D', 'D'), ('B', 'A'),('B', 'C')))
     burrow = Burrow((None, None, None, None, None, None, None, None, None, None, None), (('C', 'D', 'D', 'A'), ('D', 'B', 'C', 'D'), ('B', 'A', 'B', 'A'),('B', 'C', 'A', 'C')))
     print(burrow)
-    score_to_complete(burrow)
+    print(score_to_complete(burrow))
   

@@ -150,9 +150,8 @@ def score_to_complete(burrow):
     g_scores = {
       burrow: 0
     }
-    visited = set()
     unvisited = []
-    previous = {}
+    # previous = {}
     heapq.heappush(unvisited, (0, 0, burrow))
 
     count = 0
@@ -166,7 +165,7 @@ def score_to_complete(burrow):
         tento_score = g_scores[b] + dist
         neighbour_gscore = g_scores.get(neighbour, float('inf'))
         if tento_score < neighbour_gscore:
-          previous[neighbour] = b
+          # previous[neighbour] = b
           g_scores[neighbour] = tento_score
           count += 1
           heapq.heappush(unvisited, (tento_score + h(neighbour), count, neighbour))

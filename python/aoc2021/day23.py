@@ -103,6 +103,9 @@ class Burrow():
 
                 nextsteps.append((Burrow(tuple(new_halls), tuple(new_rooms)), cost))
 
+        if len(nextsteps) > 0:
+          return nextsteps
+          
         # Move room to hall
         for room_num, room in enumerate(self.rooms):
             is_top = False if room[1] is None else True
@@ -131,40 +134,6 @@ class Burrow():
                     nextsteps.append((Burrow(tuple(new_halls), tuple(new_rooms)), cost))
 
 
-
-        # Move room to room
-        # for room_num, room in enumerate(self.rooms):
-        #   for to_room_num, to_room in enumerate(self.rooms):
-        #     if room_num == to_room_num: continue
-            
-        #     is_top = False if room[1] is None else True
-        #     top = room[1] if is_top else room[0]
-        #     if top is None: continue
-
-        #     if target_room[top] == to_room_num and self.can_move(room_pos[room_num], room_pos[to_room_num]) and self.has_space(to_room):
-        #         new_halls = list(self.hall)
-        #         new_rooms = list(self.rooms)
-        #         new_room = list(self.rooms[room_num])
-        #         new_to_room = list(self.rooms[to_room_num])
-
-        #         if is_top:
-        #           new_room[1] = None
-        #         else:
-        #           new_room[0] = None
-        #         new_rooms[room_num] = tuple(new_room)
-
-        #         if to_room[0] == None:
-        #           new_to_room[0] = top
-        #         else:
-        #           new_to_room[1] = top
-        #         new_rooms[to_room_num] = tuple(new_to_room)
-              
-        #         cost = abs(room_pos[room_num] - room_pos[to_room_num])
-        #         cost += 1 if is_top else 2
-        #         cost += 1 if new_to_room[1] == top else 2
-        #         cost *= costs[top]
-
-        #         nextsteps.append((Burrow(tuple(new_halls), tuple(new_rooms)), cost))
         return nextsteps
 
     def can_move(self, from_sq, to_sq):

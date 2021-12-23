@@ -142,16 +142,9 @@ class Burrow():
 
 
 def h(burrow):
-  ins = 1
-  outs = 1
-  for h in burrow.hall:
-    if h is None:
-      outs += 1
-    else:
-      ins += 1
-  perc_in = ins / (len(burrow.hall) + 1)
+  ins = len([t for t in burrow.hall if t is not None])
+  perc_in = ins / len(burrow.hall)
   return 2 * perc_in
-
 
 def score_to_complete(burrow):
     g_scores = {

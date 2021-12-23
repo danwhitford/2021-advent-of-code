@@ -107,3 +107,7 @@ def test_cost5():
 def test_cost6():
     burrow = day23.Burrow((None, None, None, None, None, None, None, None, None, None, None), (('A', 'B'), ('D', 'C'), ('C', 'B'),('A', 'D')))
     assert 12521 == day23.score_to_complete(burrow)
+
+def test_bigcost():
+    burrow = day23.Burrow((None, None, None, None, None, None, None, None, None, None, None), (('A', 'D', 'D', 'B'), ('D', 'B', 'C', 'C'), ('C', 'A', 'B', 'B'),('A', 'C', 'A', 'D')))
+    assert 44169 == day23.score_to_complete(burrow)

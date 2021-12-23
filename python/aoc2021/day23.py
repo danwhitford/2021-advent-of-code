@@ -43,38 +43,31 @@ class Burrow():
                  Tuple[SQUARE, SQUARE], Tuple[SQUARE, SQUARE], ]
 
     def __repr__(self):
+      h = max(len(r) for r in self.rooms)
       s = "#############\n"
       s += '#'
       for r in self.hall:
         s += r if r != None else '.'
       s += '#\n'
       s += '###'
-      for r in [a[1] for a in self.rooms]:
+      for r in [a[h-1] for a in self.rooms]:
         s += r if r is not None else '.'
         s += '#'
       s += '##\n'
-      s += '  #'
-      for r in [a[0] for a in self.rooms]:
-        s += r if r is not None else '.'
-        s += '#'
-      s += '  \n'
+      for i in range(h-2, 0-1, -1):
+        s += '  #'
+        for r in [a[i] for a in self.rooms]:
+          s += r if r is not None else '.'
+          s += '#'
+        s += '  \n'
       s += '  #########  \n\n'
       return s
 
     def is_complete(self):
-      things = 0
-      for h in self.hall:
-        if h is not None:
-          things += 1
-      for r in self.rooms:
-        if r[0] is not None:
-          things += 1
-        if r[1] is not None:
-          things += 1
-      if things != 8:
-        print(self)
-        raise 'Youve lost some things'
-      return self.rooms == (('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D'))
+      for i, c in enumerate(['A','B','C','D']):
+        if any(c != l for l in self.rooms[i]):
+          return False
+      return True
 
     def get_nextsteps(self):
         nextsteps = []
@@ -83,36 +76,42 @@ class Burrow():
         for square_num, square in enumerate(self.hall):
           for room_num, room in enumerate(self.rooms):
             if square is not None and self.can_move(square_num, room_pos[room_num]) and self.has_space(room) and room_num == target_room[square]:
-                if room[0] is not None and room_num != target_room[room[0]]: continue
-                if room[1] is not None and room[1] != target_room[room[1]]: continue
+                if any([room_num != target_room[r] for r in room if r is not None]): continue
 
                 new_halls = list(self.hall)
                 new_rooms = list(self.rooms)
                 new_room = list(self.rooms[room_num])
 
                 new_halls[square_num] = None
-                if new_room[0] == None:
-                  new_room[0] = square
-                else:
-                  new_room[1] = square
+                first_empty = 0
+                for i,r in enumerate(room):
+                  if r is None:
+                    first_empty = i
+                    break
+                new_room[first_empty] = square
                 new_rooms[room_num] = tuple(new_room)
 
                 cost = abs(square_num - room_pos[room_num])
-                cost += 1 if new_room[1] == square else 2
+                cost += len(room) - first_empty
                 cost *= costs[square]
 
                 nextsteps.append((Burrow(tuple(new_halls), tuple(new_rooms)), cost))
 
         if len(nextsteps) > 0:
           return nextsteps
-          
+
         # Move room to hall
         for room_num, room in enumerate(self.rooms):
-            is_top = False if room[1] is None else True
-            top = room[1] if is_top else room[0]
-
+            is_top = room[len(room)-1] is not None
+            top = None
+            top_pos = None
+            for i, r in enumerate(room):
+              if r is not None:
+                top = r
+                top_pos = i
             if top is None: continue
-            if (room_num == target_room[room[0]] and room[1] == None) or (room_num == target_room[room[0]] and room_num == target_room[room[1]]):
+
+            if all(room_num == target_room[r] for r in room if r is not None):
               continue
 
             for square_num, square in enumerate(self.hall):
@@ -122,17 +121,13 @@ class Burrow():
                     new_room = list(self.rooms[room_num])
 
                     new_halls[square_num] = top
-                    if is_top:
-                      new_room[1] = None
-                    else:
-                      new_room[0] = None
+                    new_room[top_pos] = None
                     new_rooms[room_num] = tuple(new_room)
 
                     cost = abs(room_pos[room_num] - square_num)
-                    cost += (1 if is_top else 2)
+                    cost += len(room) - top_pos
                     cost *= costs[top]
                     nextsteps.append((Burrow(tuple(new_halls), tuple(new_rooms)), cost))
-
 
         return nextsteps
 
@@ -143,7 +138,7 @@ class Burrow():
             return all([s is None for s in self.hall[to_sq+1:from_sq]])
 
     def has_space(self, room):
-      return room[0] is None or room[1] is None
+      return any(r is None for r in room)
 
 
 def score_to_complete(burrow):
@@ -159,8 +154,9 @@ def score_to_complete(burrow):
       if count % 10000 == 0:
         print(f'unvis {len(unvisited):,}')
       oldscore, _, b = heapq.heappop(unvisited)
-      b.is_complete()
       visited.add(b)
+      if b.is_complete():
+        break
 
       for neighbour, score in b.get_nextsteps():
         if neighbour in visited: continue
@@ -183,7 +179,8 @@ def score_to_complete(burrow):
 
 
 if __name__ == '__main__':
-    burrow = Burrow((None, None, None, None, None, None, None, None, None, None, None), (('C', 'A'), ('D', 'D'), ('B', 'A'),('B', 'C')))
+    # burrow = Burrow((None, None, None, None, None, None, None, None, None, None, None), (('C', 'A'), ('D', 'D'), ('B', 'A'),('B', 'C')))
+    burrow = Burrow((None, None, None, None, None, None, None, None, None, None, None), (('C', 'D', 'D', 'A'), ('D', 'B', 'C', 'D'), ('B', 'A', 'B', 'A'),('B', 'C', 'A', 'C')))
     print(burrow)
     score_to_complete(burrow)
   

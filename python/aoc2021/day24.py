@@ -1,6 +1,6 @@
 import os
 import itertools
-
+import sys
 
 class ALU():
     def __init__(self):
@@ -27,9 +27,8 @@ class ALU():
 
     def execute(self, input_buffer):
         for n, i in enumerate(self.instructions):
-            # print(n, i)
             cmd = i[0]
-            if cmd == 'inp':                
+            if cmd == 'inp':        
                 self.environment[i[1]] = int(input_buffer.pop(0))
                 continue
 
@@ -60,11 +59,4 @@ if __name__ == '__main__':
     alu = ALU()
     with open(os.path.dirname(__file__) + '/res/day24') as f:
         alu.load_program(f.read())
-        
-        good = []
-        for mn in itertools.product(range(9, 0, -1), repeat=14):
-            if alu.validate_model_number(mn):
-                print(mn)
-                good.append(mn)
-        print(good)
-        print(max(good))
+        print(alu.validate_model_number('69914999975369'))

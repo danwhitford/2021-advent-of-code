@@ -1,7 +1,7 @@
 import os
 import itertools
 import sys
-
+import heapq
 class ALU():
     def __init__(self):
         self.environment = {
@@ -59,4 +59,36 @@ if __name__ == '__main__':
     alu = ALU()
     with open(os.path.dirname(__file__) + '/res/day24') as f:
         alu.load_program(f.read())
-        print(alu.validate_model_number('69914999975369'))
+
+    pq = []
+    visited = set()
+    start = (9,9,9,9,9,9,9,9,9,9,9,9,9,9)
+    alu.validate_model_number(start)
+    heapq.heappush(pq, (alu.environment['z'], 0, start))
+    visited.add(start)
+
+    count = 0
+    while len(pq) > 0:
+        score, _, mn = heapq.heappop(pq)
+        visited.add(mn)
+
+        if count % 10000 == 0:
+            print(f'Queue: {len(pq):,}')
+            print(f'Visited: {len(visited):,}')
+            print(f'Current {mn}')
+
+        if score == 0:
+            print('wow')
+            print(mn)
+            break
+
+        for n in range(14):            
+            neighbour = list(mn)
+            neighbour[n] -= 1
+            if tuple(neighbour) in visited:
+                continue
+            alu.validate_model_number(neighbour)
+            count += 1
+            heapq.heappush(pq, (alu.environment['z'], count, tuple(neighbour)))
+    
+ 
